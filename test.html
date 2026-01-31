@@ -2,20 +2,35 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Motorcu Kedi - YouTube Music</title>
+    <title>Motorcu Kedi - Saf Oyun</title>
     <style>
         body { margin: 0; overflow: hidden; background: #1a5e20; font-family: 'Segoe UI', sans-serif; }
         canvas { display: block; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; text-align: center; }
-        .menu-card { background: #222; padding: 25px; border-radius: 20px; border: 2px solid #ff9800; width: 85%; max-width: 400px; }
-        .menu-btn { width: 100%; padding: 12px; margin: 5px 0; font-size: 18px; cursor: pointer; border: none; border-radius: 10px; background: #ff9800; color: white; font-weight: bold; }
-        .music-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
-        .music-btn { background: #444; color: #ddd; border: 1px solid #666; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-        .music-btn.active { background: #4caf50; color: white; border-color: #fff; }
-        #yt-player { display: none; } /* YouTube videosunu gizliyoruz */
-        #pauseBtn { position: fixed; top: 15px; right: 15px; width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid white; color: white; z-index: 50; }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 100; color: white;
+        }
+
+        .menu-card {
+            background: #222; padding: 30px; border-radius: 20px; border: 2px solid #ff9800;
+            width: 80%; max-width: 350px; text-align: center;
+        }
+
+        .menu-btn {
+            width: 100%; padding: 15px; margin: 10px 0; font-size: 18px; cursor: pointer;
+            border: none; border-radius: 12px; background: #ff9800; color: white; font-weight: bold;
+        }
+
+        #pauseBtn {
+            position: fixed; top: 15px; right: 15px; width: 45px; height: 45px;
+            border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid white;
+            color: white; z-index: 50; cursor: pointer;
+        }
+
         .controls { position: fixed; bottom: 30px; width: 100%; display: flex; justify-content: space-around; pointer-events: none; }
-        .btn { width: 75px; height: 75px; background: rgba(255,255,255,0.3); border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; pointer-events: auto; }
+        .btn { width: 80px; height: 80px; background: rgba(255,255,255,0.3); border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; pointer-events: auto; user-select: none; }
     </style>
 </head>
 <body>
@@ -23,23 +38,12 @@
     <canvas id="gameCanvas"></canvas>
     <button id="pauseBtn" onclick="pauseGame()">⏸</button>
 
-    <div id="yt-player"></div>
-
     <div id="gameMenu" class="overlay">
         <div class="menu-card">
             <h1 id="menuTitle">MOTORCU KEDİ</h1>
-            <p id="scoreText" style="color: #ff9800;"></p>
+            <p id="scoreText" style="color: #ff9800; font-size: 20px;"></p>
             <button class="menu-btn" onclick="resumeGame()" id="resumeBtn" style="display:none;">DEVAM ET</button>
             <button class="menu-btn" onclick="resetGame()">YENİDEN BAŞLA</button>
-            
-            <div style="margin-top:20px; border-top: 1px solid #444; padding-top:10px;">
-                <p>🎵 Müzik Seçimi</p>
-                <div class="music-grid">
-                    <button class="music-btn" onclick="playYT('l8u2bq6x5_4')">Müzik 1 (Senin Şarkın)</button>
-                    <button class="music-btn" onclick="playYT('5qap5aO4i9A')">Müzik 2 (Lofi)</button>
-                </div>
-                <button class="music-btn" onclick="stopYT()" style="width:100%; margin-top:10px; background:#b71c1c;">Müziği Durdur</button>
-            </div>
         </div>
     </div>
 
@@ -48,28 +52,7 @@
         <div class="btn" id="rightBtn">▶</div>
     </div>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
-
     <script>
-        let player;
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('yt-player', {
-                height: '0', width: '0',
-                videoId: 'l8u2bq6x5_4',
-                events: { 'onReady': () => console.log("Müzik Sistemi Hazır") }
-            });
-        }
-
-        function playYT(id) {
-            player.loadVideoById(id);
-            player.playVideo();
-            document.querySelectorAll('.music-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
-        function stopYT() { player.stopVideo(); }
-
-        // --- Oyun Kodları (Öncekiyle Aynı) ---
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const menu = document.getElementById("gameMenu");
@@ -78,25 +61,52 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        let catX, lines, trees, obstacles, score, gameSpeed, isPaused = true;
+        let catX, lines, trees, obstacles, score, gameSpeed;
+        let isPaused = true;
         let moveLeft = false, moveRight = false;
         const roadWidth = canvas.width * 0.7;
         const roadX = (canvas.width - roadWidth) / 2;
 
-        function pauseGame() { isPaused = true; menu.style.display = "flex"; resumeBtn.style.display = "block"; }
-        function resumeGame() { isPaused = false; menu.style.display = "none"; requestAnimationFrame(draw); }
+        function pauseGame() {
+            isPaused = true;
+            menu.style.display = "flex";
+            resumeBtn.style.display = "block";
+            document.getElementById("menuTitle").innerText = "DURDURULDU";
+        }
+
+        function resumeGame() {
+            isPaused = false;
+            menu.style.display = "none";
+            requestAnimationFrame(draw);
+        }
+
         function resetGame() {
-            catX = canvas.width / 2; gameSpeed = 7; score = 0;
+            catX = canvas.width / 2;
+            gameSpeed = 7;
+            score = 0;
             lines = [0, 150, 300, 450, 600];
-            trees = [{x: roadX-60, y:0}, {x: roadX+roadWidth+20, y:300}];
-            obstacles = [{x: roadX + 40, y: -300}, {x: roadX + 120, y: -800}];
-            isPaused = false; menu.style.display = "none"; draw();
+            trees = [
+                {x: roadX - 60, y: 0}, 
+                {x: roadX + roadWidth + 20, y: 300},
+                {x: roadX - 70, y: 500}
+            ];
+            obstacles = [
+                {x: roadX + Math.random()*(roadWidth-40), y: -300},
+                {x: roadX + Math.random()*(roadWidth-40), y: -800}
+            ];
+            isPaused = false;
+            menu.style.display = "none";
+            resumeBtn.style.display = "none";
+            draw();
         }
 
         const setup = (id, dir) => {
             const el = document.getElementById(id);
-            el.addEventListener("touchstart", (e) => { e.preventDefault(); if(dir==='L') moveLeft=true; else moveRight=true; });
-            el.addEventListener("touchend", () => { moveLeft=false; moveRight=false; });
+            const action = (val) => { if(dir==='L') moveLeft=val; else moveRight=val; };
+            el.addEventListener("touchstart", (e) => { e.preventDefault(); action(true); });
+            el.addEventListener("touchend", () => action(false));
+            el.addEventListener("mousedown", () => action(true));
+            el.addEventListener("mouseup", () => action(false));
         };
         setup("leftBtn", "L"); setup("rightBtn", "R");
 
@@ -106,8 +116,11 @@
             score += 0.1;
             gameSpeed += 0.001;
 
+            // Yol
             ctx.fillStyle = "#444";
             ctx.fillRect(roadX, 0, roadWidth, canvas.height);
+            
+            // Şeritler
             ctx.fillStyle = "#fff";
             lines.forEach((ly, i) => {
                 ctx.fillRect(canvas.width/2 - 5, ly, 10, 50);
@@ -115,12 +128,21 @@
                 if(lines[i] > canvas.height) lines[i] = -60;
             });
 
+            // Ağaçlar
+            ctx.font = "40px Arial";
+            trees.forEach(t => {
+                ctx.fillText("🌲", t.x, t.y);
+                t.y += gameSpeed;
+                if(t.y > canvas.height) t.y = -100;
+            });
+
+            // Engeller
             obstacles.forEach(ob => {
-                ctx.font = "40px Arial";
                 ctx.fillText("📦", ob.x, ob.y);
                 ob.y += gameSpeed;
                 if (ob.y > canvas.height - 180 && ob.y < canvas.height - 100 && Math.abs(ob.x - (catX-25)) < 45) {
-                    isPaused = true; menu.style.display = "flex";
+                    isPaused = true;
+                    menu.style.display = "flex";
                     document.getElementById("menuTitle").innerText = "OYUN BİTTİ";
                     document.getElementById("scoreText").innerText = "Skor: " + Math.floor(score);
                     resumeBtn.style.display = "none";
@@ -128,15 +150,20 @@
                 if(ob.y > canvas.height) { ob.y = -200; ob.x = roadX + Math.random()*(roadWidth-40); }
             });
 
+            // Kedi
             ctx.font = "50px Arial";
             ctx.fillText("🐈🏍️", catX - 25, canvas.height - 120);
+
             if (moveLeft && catX > roadX + 35) catX -= 8;
             if (moveRight && catX < roadX + roadWidth - 35) catX += 8;
-            
-            ctx.fillStyle = "white"; ctx.font = "bold 20px Arial";
+
+            ctx.fillStyle = "white";
+            ctx.font = "bold 20px Arial";
             ctx.fillText("SKOR: " + Math.floor(score), 20, 40);
+
             requestAnimationFrame(draw);
         }
+
         menu.style.display = "flex";
     </script>
 </body>
