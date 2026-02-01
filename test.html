@@ -1,171 +1,550 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Motorcu Kedi - Mor Macera</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boostlu Motor Oyunu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; background: #1a5e20; font-family: sans-serif; }
-        canvas { display: block; }
-        
-        /* HAVA DURUMU BUTONU */
-        #weatherBtn { 
-            position: fixed; top: 20px; left: 20px; width: 60px; height: 60px; 
-            background: #fff; border-radius: 15px; display: flex; align-items: center; 
-            justify-content: center; font-size: 30px; cursor: pointer; z-index: 500; 
-            border: 4px solid #9c27b0; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        :root {
+            --bg-gradient: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            --road-color: #474e5d;
         }
 
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; color: white; }
-        .menu-card { background: #222; padding: 30px; border-radius: 20px; border: 3px solid #9c27b0; text-align: center; width: 260px; }
-        .menu-btn { width: 100%; padding: 12px; margin: 10px 0; font-size: 18px; background: #9c27b0; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-gradient);
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            position: relative;
+            width: 600px;
+            height: 95vh;
+            background-color: #8fd3f4;
+            background-image: linear-gradient(to top, #8fd3f4 0%, #84fab0 100%);
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+        }
+
+        #road {
+            width: 340px;
+            height: 100%;
+            background-color: var(--road-color);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-left: 8px solid rgba(255,255,255,0.5);
+            border-right: 8px solid rgba(255,255,255,0.5);
+            transition: filter 0.3s;
+        }
         
-        .control-btn { width: 85px; height: 85px; background: rgba(156, 39, 176, 0.5); border: 3px solid #e1bee7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; pointer-events: auto; }
+        /* Boost Efekti (Yol Bulanıklaşır) */
+        .road-boosted {
+            filter: blur(1px);
+        }
+
+        .lane-marker {
+            position: absolute;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.6) 50%, transparent 50%);
+            background-size: 100% 100px;
+            animation: moveRoad 0.5s linear infinite;
+            border-radius: 3px;
+        }
+        #line-1 { left: 110px; }
+        #line-2 { left: 224px; }
+
+        @keyframes moveRoad {
+            from { background-position: 0 0; }
+            to { background-position: 0 100px; }
+        }
+
+        /* --- OYUNCU (RESİMLİ) --- */
+        #player {
+            position: absolute;
+            width: 50px; /* Resim boyutuna göre ayarla */
+            height: 80px;
+            bottom: 30px;
+            transform: translateX(-50%);
+            z-index: 10;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: left 0.15s ease-out;
+            /* Varsayılan resim JS'den gelecek */
+        }
+
+        /* Boost Ateşi */
+        #boost-fire {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 40px;
+            background: linear-gradient(to top, yellow, red);
+            border-radius: 50%;
+            display: none; /* Başlangıçta gizli */
+            filter: blur(5px);
+            animation: flicker 0.1s infinite;
+            z-index: -1;
+        }
+
+        @keyframes flicker {
+            0% { height: 40px; opacity: 0.8; }
+            100% { height: 50px; opacity: 1; }
+        }
+
+        /* --- BOOST İTEMİ --- */
+        .boost-item {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            transform: translateX(-50%);
+            z-index: 8;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            /* Parlama efekti */
+            filter: drop-shadow(0 0 10px cyan);
+            animation: pulse 0.5s infinite alternate;
+        }
+        @keyframes pulse {
+            from { transform: translateX(-50%) scale(1); }
+            to { transform: translateX(-50%) scale(1.1); }
+        }
+
+        /* --- ENGELLER (ARAÇLAR) --- */
+        .obstacle {
+            position: absolute;
+            transform: translateX(-50%);
+            z-index: 9;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+        }
+
+        /* CSS ile çizilmiş araçlar (Resim istenirse burası da değişebilir ama şimdilik CSS kalsın) */
+        .obs-car { width: 44px; height: 70px; background: #4facfe; border-radius: 8px; }
+        .obs-car::before { content: ''; position: absolute; top: 10px; width: 36px; height: 12px; background: rgba(0,0,0,0.3); border-radius: 2px; }
         
-        #boostContainer { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 200px; height: 20px; background: #333; border: 2px solid #fff; display: none; border-radius: 10px; overflow: hidden; z-index: 400; }
-        #boostBar { width: 100%; height: 100%; background: #9c27b0; }
-        #scoreUI { position: fixed; top: 90px; left: 20px; color: white; font-weight: bold; font-size: 22px; z-index: 400; text-shadow: 2px 2px 4px #000; }
+        .obs-truck { width: 55px; height: 110px; background: #ff6b6b; border-radius: 6px; }
+        .obs-truck::before { content: ''; position: absolute; top: 5px; width: 45px; height: 75px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 4px; }
+        
+        .obs-motor { width: 20px; height: 50px; background: #43e97b; border-radius: 5px; }
+        .obs-motor::before { content: ''; position: absolute; top: 15px; left: 2px; width: 16px; height: 16px; background: #333; border-radius: 50%; }
+
+        /* --- AĞAÇLAR --- */
+        .tree {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, #b4ec51, #429321);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        /* --- RGB PACMAN --- */
+        #pacman {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            left: -200px;
+            top: 0;
+            z-index: 100;
+            display: none;
+        }
+        
+        .pacman-body {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(transparent 30deg, currentColor 30deg 330deg, transparent 330deg);
+            animation: chomp 0.15s infinite alternate, hyperRGB 0.3s linear infinite;
+            transform: rotate(90deg);
+        }
+
+        @keyframes chomp {
+            0% { background: conic-gradient(transparent 30deg, currentColor 30deg 330deg, transparent 330deg); }
+            100% { background: conic-gradient(transparent 0deg, currentColor 0deg 360deg, transparent 360deg); }
+        }
+
+        @keyframes hyperRGB {
+            0% { color: red; filter: drop-shadow(0 0 15px red); }
+            20% { color: yellow; filter: drop-shadow(0 0 15px yellow); }
+            40% { color: lime; filter: drop-shadow(0 0 15px lime); }
+            60% { color: cyan; filter: drop-shadow(0 0 15px cyan); }
+            80% { color: magenta; filter: drop-shadow(0 0 15px magenta); }
+            100% { color: red; filter: drop-shadow(0 0 15px red); }
+        }
+
+        /* --- UI --- */
+        #score-board {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #333;
+            font-size: 22px;
+            font-weight: 800;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 8px 15px;
+            border-radius: 12px;
+        }
+
+        #boost-indicator {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            color: #ff0055;
+            font-size: 20px;
+            font-weight: 900;
+            z-index: 50;
+            display: none;
+            text-shadow: 0 0 10px white;
+        }
+
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 20px;
+            cursor: pointer;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            margin-top: 20px;
+        }
+
     </style>
 </head>
 <body>
 
-    <div id="weatherBtn" onclick="toggleWeather()">☀️</div>
-    <div id="scoreUI">Skor: 0</div>
-    <div id="boostContainer"><div id="boostBar"></div></div>
-    <canvas id="gameCanvas"></canvas>
+    <div id="game-container">
+        <div id="side-left" style="position:absolute; left:0; width:130px; height:100%;"></div>
+        
+        <div id="road">
+            <div class="lane-marker" id="line-1"></div>
+            <div class="lane-marker" id="line-2"></div>
+            <div id="player">
+                <div id="boost-fire"></div>
+            </div>
+        </div>
 
-    <div id="gameMenu" class="overlay">
-        <div class="menu-card">
-            <h1 style="color:#ce93d8">MOR ORMAN</h1>
-            <p id="scoreText"></p>
-            <button class="menu-btn" onclick="resetGame()">BAŞLA</button>
+        <div id="side-right" style="position:absolute; right:0; width:130px; height:100%;"></div>
+
+        <div id="score-board">SKOR: 0</div>
+        <div id="boost-indicator">karbon salınımı yapılıyor!</div>
+        
+        <div id="pacman"><div class="pacman-body"></div></div>
+
+        <div id="game-over-screen">
+            <h1 style="font-size:40px; color:#ff6b6b;">kedi şehidül namırın oldu sayende</h1>
+            <p id="final-score" style="font-size:24px; font-weight:bold;">Skor: 0</p>
+            <button onclick="resetGame()">TEKRAR KOŞ</button>
         </div>
     </div>
 
-    <div style="position:fixed; bottom:40px; width:100%; display:flex; justify-content:space-around; pointer-events:none; z-index:600;">
-        <div id="leftBtn" class="control-btn" onmousedown="moveLeft=true" onmouseup="moveLeft=false" ontouchstart="moveLeft=true" ontouchend="moveLeft=false">◀</div>
-        <div id="rightBtn" class="control-btn" onmousedown="moveRight=true" onmouseup="moveRight=false" ontouchstart="moveRight=true" ontouchend="moveRight=false">▶</div>
-    </div>
-
     <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
+        // ==========================================
+        // AYARLAR (RESİM LİNKLERİNİ BURAYA YAPIŞTIR)
+        // ==========================================
         
-        const treeImg = new Image(); treeImg.src = "https://resmim.net/cdn/2026/01/31/wVgFX3.png"; 
-        const boostImg = new Image(); boostImg.src = "https://resmim.net/cdn/2026/01/31/wVgHRQ.jpg";
+        // Oyuncu Aracı Resmi (Kuş bakışı motor veya araba)
+        const OYUNCU_RESMI = "https://resmim.net/cdn/2026/02/01/w6HxSj.png"; 
+        
+        // Boost (Nitro) Şişesi Resmi
+        const BOOST_RESMI = "https://resmim.net/cdn/2026/01/31/wVgHRQ.jpg";
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        // ==========================================
 
-        let catX, gameSpeed, score, isPaused = true, boostActive = false, boostTimer = 0;
-        let trees = [], lines = [], obstacles = [], drops = [], boostItem = {x:0, y:-2000, active:true};
-        let isRainy = false, moveLeft = false, moveRight = false;
-        const roadWidth = Math.min(canvas.width * 0.65, 420);
-        const roadX = (canvas.width - roadWidth) / 2;
+        const player = document.getElementById('player');
+        const boostFire = document.getElementById('boost-fire');
+        const road = document.getElementById('road');
+        const sideLeft = document.getElementById('side-left');
+        const sideRight = document.getElementById('side-right');
+        const scoreBoard = document.getElementById('score-board');
+        const boostIndicator = document.getElementById('boost-indicator');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScore = document.getElementById('final-score');
+        const pacman = document.getElementById('pacman');
 
-        function toggleWeather() {
-            isRainy = !isRainy;
-            document.getElementById("weatherBtn").innerText = isRainy ? "🌧️" : "☀️";
+        // Resimleri uygula
+        player.style.backgroundImage = `url('${OYUNCU_RESMI}')`;
+
+        let gameRunning = true;
+        let score = 0;
+        let baseSpeed = 5; // Normal hız
+        let currentSpeed = 5;
+        let lane = 1; 
+        let obstacles = [];
+        let boostItems = [];
+        let trees = [];
+        let animationFrameId;
+        let isBoosting = false;
+        let boostTimeout;
+
+        const lanePositions = [56, 170, 283];
+
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                if (lane > 0) lane--;
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                if (lane < 2) lane++;
+            }
+            updatePlayerPosition();
+        });
+
+        function updatePlayerPosition() {
+            player.style.left = lanePositions[lane] + 'px';
+            const tilt = lane === 1 ? 0 : (lane === 0 ? -15 : 15);
+            player.style.transform = `translateX(-50%) rotate(${tilt}deg)`;
+        }
+
+        function activateBoost() {
+            if (isBoosting) return; // Zaten aktifse tekrar etme
+            
+            isBoosting = true;
+            boostIndicator.style.display = 'block';
+            boostFire.style.display = 'block';
+            road.classList.add('road-boosted');
+            
+            // Hızı artır
+            currentSpeed = baseSpeed + 10; 
+
+            // 6 Saniye sonra kapat
+            clearTimeout(boostTimeout);
+            boostTimeout = setTimeout(() => {
+                isBoosting = false;
+                currentSpeed = baseSpeed;
+                boostIndicator.style.display = 'none';
+                boostFire.style.display = 'none';
+                road.classList.remove('road-boosted');
+            }, 6000);
+        }
+
+        function createObstacle() {
+            if (!gameRunning) return;
+            const obs = document.createElement('div');
+            obs.classList.add('obstacle');
+            
+            const types = ['obs-car', 'obs-truck', 'obs-motor'];
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            obs.classList.add(randomType);
+
+            const randomLane = Math.floor(Math.random() * 3);
+            obs.style.left = lanePositions[randomLane] + 'px';
+            obs.style.top = '-150px';
+            
+            road.appendChild(obs);
+            obstacles.push({ element: obs, top: -150 });
+        }
+
+        function createBoostItem() {
+            if (!gameRunning) return;
+            const item = document.createElement('div');
+            item.classList.add('boost-item');
+            item.style.backgroundImage = `url('${BOOST_RESMI}')`;
+            
+            const randomLane = Math.floor(Math.random() * 3);
+            item.style.left = lanePositions[randomLane] + 'px';
+            item.style.top = '-100px';
+
+            road.appendChild(item);
+            boostItems.push({ element: item, top: -100 });
+        }
+
+        function createTree() {
+            if (!gameRunning) return;
+            const tree = document.createElement('div');
+            tree.classList.add('tree');
+            tree.style.top = '-70px';
+            const side = Math.random() < 0.5 ? sideLeft : sideRight;
+            tree.style.left = Math.random() * 70 + 'px';
+            side.appendChild(tree);
+            trees.push({ element: tree, top: -70 });
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            // Skor artışı (Boost varsa 5 kat hızlı artar)
+            score += isBoosting ? 5 : 1;
+            scoreBoard.innerText = "SKOR: " + Math.floor(score / 10);
+
+            // Zamanla hızlanma (Boost yoksa)
+            if (!isBoosting && score % 500 === 0) {
+                baseSpeed += 0.5;
+                currentSpeed = baseSpeed;
+            }
+
+            // Engel Oluşturma
+            if (Math.random() < 0.015) createObstacle();
+            
+            // Boost İtemi Oluşturma (Daha nadir)
+            if (Math.random() < 0.002) createBoostItem();
+
+            // Ağaç Oluşturma
+            if (Math.random() < 0.05) createTree();
+
+            // Engelleri Hareket Ettir
+            obstacles.forEach((obs, index) => {
+                obs.top += currentSpeed;
+                obs.element.style.top = obs.top + 'px';
+
+                if (checkCollision(player, obs.element)) {
+                    triggerGameOver();
+                }
+
+                if (obs.top > window.innerHeight) {
+                    obs.element.remove();
+                    obstacles.splice(index, 1);
+                }
+            });
+
+            // Boost İtemlerini Hareket Ettir
+            boostItems.forEach((item, index) => {
+                item.top += currentSpeed;
+                item.element.style.top = item.top + 'px';
+
+                // Boost alma kontrolü
+                if (checkCollision(player, item.element)) {
+                    activateBoost();
+                    item.element.remove();
+                    boostItems.splice(index, 1);
+                } else if (item.top > window.innerHeight) {
+                    item.element.remove();
+                    boostItems.splice(index, 1);
+                }
+            });
+
+            // Ağaçları Hareket Ettir
+            trees.forEach((tree, index) => {
+                tree.top += currentSpeed;
+                tree.element.style.top = tree.top + 'px';
+                if (tree.top > window.innerHeight) {
+                    tree.element.remove();
+                    trees.splice(index, 1);
+                }
+            });
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function checkCollision(playerEl, otherEl) {
+            const pRect = playerEl.getBoundingClientRect();
+            const oRect = otherEl.getBoundingClientRect();
+            
+            // Hitbox küçültme (daha adil oyun için)
+            const padding = 10;
+
+            return !(
+                pRect.top > oRect.bottom - padding ||
+                pRect.bottom < oRect.top + padding ||
+                pRect.right < oRect.left + padding ||
+                pRect.left > oRect.right - padding
+            );
+        }
+
+        function triggerGameOver() {
+            gameRunning = false;
+            cancelAnimationFrame(animationFrameId);
+            clearTimeout(boostTimeout);
+            
+            document.querySelectorAll('.lane-marker').forEach(el => el.style.animationPlayState = 'paused');
+            playPacmanAnimation();
+        }
+
+        function playPacmanAnimation() {
+            pacman.style.display = 'block';
+            const playerRect = player.getBoundingClientRect();
+            const containerRect = document.getElementById('game-container').getBoundingClientRect();
+            
+            const relativeTop = playerRect.top - containerRect.top - 20; 
+            pacman.style.top = relativeTop + 'px';
+            pacman.style.left = '-150px'; 
+
+            let pacmanPos = -150;
+            const targetPos = 130 + parseFloat(player.style.left); 
+
+            function animatePacman() {
+                pacmanPos += 20; 
+                pacman.style.left = pacmanPos + 'px';
+
+                if (pacmanPos < targetPos + 60) { 
+                    requestAnimationFrame(animatePacman);
+                } else {
+                    player.style.visibility = 'hidden';
+                    setTimeout(showGameOverScreen, 300);
+                }
+            }
+            animatePacman();
+        }
+
+        function showGameOverScreen() {
+            finalScore.innerText = "Skor: " + Math.floor(score / 10);
+            gameOverScreen.style.display = 'flex';
         }
 
         function resetGame() {
-            catX = canvas.width / 2; gameSpeed = 6; score = 0; boostActive = false;
-            trees = []; lines = [0, 200, 400, 600];
-            obstacles = [{x: roadX + 50, y: -600}, {x: roadX + roadWidth - 100, y: -1200}];
-            for(let i=0; i<8; i++) {
-                trees.push({ x: Math.random()*(roadX-90), y: i*200, side: 'L' });
-                trees.push({ x: roadX + roadWidth + Math.random()*20, y: i*200, side: 'R' });
-            }
-            drops = Array.from({length: 50}, () => ({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*10+10}));
-            isPaused = false;
-            document.getElementById("gameMenu").style.display = "none";
-            draw();
-        }
-
-        function draw() {
-            if (isPaused) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            gameRunning = true;
+            score = 0;
+            baseSpeed = 5;
+            currentSpeed = 5;
+            lane = 1;
+            isBoosting = false;
             
-            ctx.fillStyle = isRainy ? "#0d1b2a" : "#1a5e20"; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            updatePlayerPosition();
+            player.style.visibility = 'visible';
+            boostIndicator.style.display = 'none';
+            boostFire.style.display = 'none';
+            road.classList.remove('road-boosted');
+            
+            // Temizlik
+            obstacles.forEach(o => o.element.remove());
+            obstacles = [];
+            boostItems.forEach(b => b.element.remove());
+            boostItems = [];
+            trees.forEach(t => t.element.remove());
+            trees = [];
+            
+            pacman.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            document.querySelectorAll('.lane-marker').forEach(el => el.style.animationPlayState = 'running');
 
-            let currentSpeed = boostActive ? gameSpeed * 2.5 : gameSpeed;
-
-            if(boostActive) {
-                boostTimer--;
-                document.getElementById("boostBar").style.width = (boostTimer/360)*100 + "%";
-                if(boostTimer <= 0) {
-                    boostActive = false;
-                    document.getElementById("boostContainer").style.display = "none";
-                }
-            }
-
-            // Yol ve Şeritler
-            ctx.fillStyle = "#333"; ctx.fillRect(roadX, 0, roadWidth, canvas.height);
-            ctx.fillStyle = "#fff";
-            lines.forEach((ly, i) => {
-                ctx.fillRect(canvas.width/2 - 5, ly, 10, 60);
-                lines[i] += currentSpeed;
-                if(lines[i] > canvas.height) lines[i] = -60;
-            });
-
-            // Mor Ağaçlar
-            ctx.filter = "hue-rotate(260deg) saturate(140%)";
-            trees.forEach(t => {
-                ctx.drawImage(treeImg, t.x, t.y, 90, 120);
-                t.y += currentSpeed;
-                if(t.y > canvas.height) t.y = -130;
-            });
-            ctx.filter = "none";
-
-            // Engeller (Kutular)
-            ctx.font = "40px Arial";
-            obstacles.forEach(ob => {
-                ctx.fillText("📦", ob.x, ob.y);
-                ob.y += currentSpeed;
-                if(Math.abs(ob.y - (canvas.height-120)) < 40 && Math.abs(ob.x - (catX-25)) < 40) {
-                    if(!boostActive) { isPaused = true; document.getElementById("gameMenu").style.display = "flex"; document.getElementById("scoreText").innerText = "Skor: " + Math.floor(score); }
-                    else ob.y = -500;
-                }
-                if(ob.y > canvas.height) { ob.y = -400; ob.x = roadX + Math.random()*(roadWidth-60); }
-            });
-
-            // Boost Item (Nitro)
-            if(boostItem.active) {
-                ctx.filter = "hue-rotate(260deg)"; // Nitroyu da mor yapar
-                ctx.drawImage(boostImg, boostItem.x, boostItem.y, 50, 50);
-                ctx.filter = "none";
-                boostItem.y += currentSpeed;
-                if(Math.abs(boostItem.y - (canvas.height-120)) < 50 && Math.abs(boostItem.x - (catX-25)) < 50) {
-                    boostActive = true; boostTimer = 360; boostItem.active = false;
-                    document.getElementById("boostContainer").style.display = "block";
-                }
-                if(boostItem.y > canvas.height) { boostItem.y = -2000; boostItem.x = roadX + Math.random()*(roadWidth-50); boostItem.active = true; }
-            }
-
-            // Yağmur
-            if(isRainy) {
-                ctx.strokeStyle = "rgba(200, 200, 255, 0.5)";
-                drops.forEach(d => {
-                    ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x, d.y+15); ctx.stroke();
-                    d.y += d.s + currentSpeed;
-                    if(d.y > canvas.height) d.y = -20;
-                });
-            }
-
-            // Kedi
-            ctx.font = "55px Arial";
-            ctx.fillText("🐈🏍️", catX - 30, canvas.height - 100);
-            if (moveLeft && catX > roadX + 40) catX -= 8;
-            if (moveRight && catX < roadX + roadWidth - 40) catX += 8;
-
-            score += boostActive ? 0.3 : 0.1;
-            gameSpeed += 0.001;
-            document.getElementById("scoreUI").innerText = "Skor: " + Math.floor(score);
-            requestAnimationFrame(draw);
+            gameLoop();
         }
 
-        window.onkeydown = (e) => { if(e.key=="ArrowLeft") moveLeft=true; if(e.key=="ArrowRight") moveRight=true; };
-        window.onkeyup = (e) => { moveLeft=false; moveRight=false; };
+        updatePlayerPosition();
+        gameLoop();
+
     </script>
 </body>
 </html>
