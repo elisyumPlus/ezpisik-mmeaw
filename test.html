@@ -2,549 +2,613 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boostlu Motor Oyunu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sweet Rider: Pacman Edition</title>
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-            --road-color: #474e5d;
+            --bg-pastel: #f3e5f5;
+            --road-soft: #9575cd;
+            --candy-pink: #ff80ab;
+            --mint: #b2dfdb;
+            --white: #ffffff;
+            --gold: #ffd700;
         }
 
-        body {
+        body, html {
             margin: 0;
             padding: 0;
-            background: var(--bg-gradient);
-            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background-color: var(--bg-pastel);
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            color: #5e35b1;
         }
 
         #game-container {
             position: relative;
-            width: 600px;
-            height: 95vh;
-            background-color: #8fd3f4;
-            background-image: linear-gradient(to top, #8fd3f4 0%, #84fab0 100%);
-            overflow: hidden;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-            display: flex;
-            justify-content: center;
-        }
-
-        #road {
-            width: 340px;
-            height: 100%;
-            background-color: var(--road-color);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            border-left: 8px solid rgba(255,255,255,0.5);
-            border-right: 8px solid rgba(255,255,255,0.5);
-            transition: filter 0.3s;
-        }
-        
-        /* Boost Efekti (Yol Bulanıklaşır) */
-        .road-boosted {
-            filter: blur(1px);
-        }
-
-        .lane-marker {
-            position: absolute;
-            width: 6px;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.6) 50%, transparent 50%);
-            background-size: 100% 100px;
-            animation: moveRoad 0.5s linear infinite;
-            border-radius: 3px;
-        }
-        #line-1 { left: 110px; }
-        #line-2 { left: 224px; }
-
-        @keyframes moveRoad {
-            from { background-position: 0 0; }
-            to { background-position: 0 100px; }
-        }
-
-        /* --- OYUNCU (RESİMLİ) --- */
-        #player {
-            position: absolute;
-            width: 50px; /* Resim boyutuna göre ayarla */
-            height: 80px;
-            bottom: 30px;
-            transform: translateX(-50%);
-            z-index: 10;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            transition: left 0.15s ease-out;
-            /* Varsayılan resim JS'den gelecek */
-        }
-
-        /* Boost Ateşi */
-        #boost-fire {
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 40px;
-            background: linear-gradient(to top, yellow, red);
-            border-radius: 50%;
-            display: none; /* Başlangıçta gizli */
-            filter: blur(5px);
-            animation: flicker 0.1s infinite;
-            z-index: -1;
-        }
-
-        @keyframes flicker {
-            0% { height: 40px; opacity: 0.8; }
-            100% { height: 50px; opacity: 1; }
-        }
-
-        /* --- BOOST İTEMİ --- */
-        .boost-item {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            transform: translateX(-50%);
-            z-index: 8;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            /* Parlama efekti */
-            filter: drop-shadow(0 0 10px cyan);
-            animation: pulse 0.5s infinite alternate;
-        }
-        @keyframes pulse {
-            from { transform: translateX(-50%) scale(1); }
-            to { transform: translateX(-50%) scale(1.1); }
-        }
-
-        /* --- ENGELLER (ARAÇLAR) --- */
-        .obstacle {
-            position: absolute;
-            transform: translateX(-50%);
-            z-index: 9;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            display: flex;
-            justify-content: center;
-        }
-
-        /* CSS ile çizilmiş araçlar (Resim istenirse burası da değişebilir ama şimdilik CSS kalsın) */
-        .obs-car { width: 44px; height: 70px; background: #4facfe; border-radius: 8px; }
-        .obs-car::before { content: ''; position: absolute; top: 10px; width: 36px; height: 12px; background: rgba(0,0,0,0.3); border-radius: 2px; }
-        
-        .obs-truck { width: 55px; height: 110px; background: #ff6b6b; border-radius: 6px; }
-        .obs-truck::before { content: ''; position: absolute; top: 5px; width: 45px; height: 75px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 4px; }
-        
-        .obs-motor { width: 20px; height: 50px; background: #43e97b; border-radius: 5px; }
-        .obs-motor::before { content: ''; position: absolute; top: 15px; left: 2px; width: 16px; height: 16px; background: #333; border-radius: 50%; }
-
-        /* --- AĞAÇLAR --- */
-        .tree {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle at 30% 30%, #b4ec51, #429321);
-            border-radius: 50%;
-            z-index: 2;
-        }
-
-        /* --- RGB PACMAN --- */
-        #pacman {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            left: -200px;
-            top: 0;
-            z-index: 100;
-            display: none;
-        }
-        
-        .pacman-body {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(transparent 30deg, currentColor 30deg 330deg, transparent 330deg);
-            animation: chomp 0.15s infinite alternate, hyperRGB 0.3s linear infinite;
-            transform: rotate(90deg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        @keyframes chomp {
-            0% { background: conic-gradient(transparent 30deg, currentColor 30deg 330deg, transparent 330deg); }
-            100% { background: conic-gradient(transparent 0deg, currentColor 0deg 360deg, transparent 360deg); }
+        canvas {
+            display: block;
+            box-shadow: 0 10px 30px rgba(149, 117, 205, 0.3);
+            background: linear-gradient(to bottom, #ce93d8, #f3e5f5);
         }
 
-        @keyframes hyperRGB {
-            0% { color: red; filter: drop-shadow(0 0 15px red); }
-            20% { color: yellow; filter: drop-shadow(0 0 15px yellow); }
-            40% { color: lime; filter: drop-shadow(0 0 15px lime); }
-            60% { color: cyan; filter: drop-shadow(0 0 15px cyan); }
-            80% { color: magenta; filter: drop-shadow(0 0 15px magenta); }
-            100% { color: red; filter: drop-shadow(0 0 15px red); }
-        }
-
-        /* --- UI --- */
-        #score-board {
+        #ui {
             position: absolute;
             top: 20px;
             left: 20px;
-            color: #333;
-            font-size: 22px;
-            font-weight: 800;
-            z-index: 50;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(5px);
-            padding: 8px 15px;
-            border-radius: 12px;
+            pointer-events: none;
         }
 
-        #boost-indicator {
-            position: absolute;
-            top: 70px;
-            left: 20px;
-            color: #ff0055;
+        .stat {
             font-size: 20px;
-            font-weight: 900;
-            z-index: 50;
-            display: none;
-            text-shadow: 0 0 10px white;
+            font-weight: bold;
+            color: #7b1fa2;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+            border: 2px solid var(--candy-pink);
+            transition: all 0.3s;
         }
 
-        #game-over-screen {
+        .stat.boost-active {
+            border-color: var(--gold);
+            background: rgba(255, 215, 0, 0.3);
+            transform: scale(1.1);
+        }
+
+        #overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
-            display: none;
+            background: rgba(255, 255, 255, 0.9);
+            display: none; /* Default hidden, managed by JS */
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 200;
+            z-index: 20;
         }
 
-        button {
-            padding: 15px 40px;
-            font-size: 20px;
-            cursor: pointer;
-            background: #333;
-            color: white;
-            border: none;
-            border-radius: 50px;
+        #start-screen {
+            display: flex; /* Initial screen */
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+        }
+
+        h1 {
+            color: var(--candy-pink);
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px #fce4ec;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .menu-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
             margin-top: 20px;
         }
 
+        .difficulty-btns {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 18px;
+            background: var(--candy-pink);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 0px #d81b60;
+        }
+
+        button.diff-btn {
+            background: #9575cd;
+            box-shadow: 0 4px 0px #5e35b1;
+            font-size: 16px;
+        }
+
+        button.diff-btn.active {
+            background: #7b1fa2;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0px #4a148c;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .start-btn-class {
+            background: #4caf50;
+            box-shadow: 0 4px 0px #2e7d32;
+            width: 200px;
+            font-size: 22px;
+        }
+
+        #boost-bar {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+            border: 2px solid var(--gold);
+            display: none;
+        }
+
+        #boost-fill {
+            height: 100%;
+            width: 100%;
+            background: var(--gold);
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div id="side-left" style="position:absolute; left:0; width:130px; height:100%;"></div>
-        
-        <div id="road">
-            <div class="lane-marker" id="line-1"></div>
-            <div class="lane-marker" id="line-2"></div>
-            <div id="player">
-                <div id="boost-fire"></div>
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui">
+        <div id="speed-box" class="stat">ŞEKER HIZI: <span id="speed-val">60</span></div>
+        <div class="stat">PUAN: <span id="score-val">0</span></div>
+        <div class="stat">ZORLUK: <span id="diff-label">ORTA</span></div>
+    </div>
+
+    <div id="boost-bar"><div id="boost-fill"></div></div>
+
+    <!-- Başlangıç Ekranı -->
+    <div id="start-screen">
+        <h1>SWEET RIDER</h1>
+        <div class="menu-section">
+            <span style="font-weight: bold; color: #5e35b1;">Zorluk Seç:</span>
+            <div class="difficulty-btns">
+                <button class="diff-btn" data-level="easy">KOLAY</button>
+                <button class="diff-btn active" data-level="medium">ORTA</button>
+                <button class="diff-btn" data-level="hard">ZOR</button>
             </div>
+            <button id="real-start-btn" class="start-btn-class">BAŞLA ✨</button>
         </div>
-
-        <div id="side-right" style="position:absolute; right:0; width:130px; height:100%;"></div>
-
-        <div id="score-board">SKOR: 0</div>
-        <div id="boost-indicator">karbon salınımı yapılıyor!</div>
-        
-        <div id="pacman"><div class="pacman-body"></div></div>
-
-        <div id="game-over-screen">
-            <h1 style="font-size:40px; color:#ff6b6b;">kedi şehidül namırın oldu sayende</h1>
-            <p id="final-score" style="font-size:24px; font-weight:bold;">Skor: 0</p>
-            <button onclick="resetGame()">TEKRAR KOŞ</button>
+        <div style="margin-top:20px; color:#9c27b0; font-size:14px; text-align:center; background:white; padding:10px 20px; border-radius:15px; border: 1px solid #ddd;">
+            Yön tuşları veya Dokunmatik ile yönet!<br>
+            Yıldızlar ⭐ seni korur ve hızlandırır!
         </div>
     </div>
 
-    <script>
-        // ==========================================
-        // AYARLAR (RESİM LİNKLERİNİ BURAYA YAPIŞTIR)
-        // ==========================================
+    <!-- Oyun Bitti Ekranı -->
+    <div id="overlay">
+        <h1 id="end-title">OYUN BİTTİ ✨</h1>
+        <div id="crash-msg" style="color:#d81b60; font-size:28px; margin-bottom:15px; font-weight:bold;">PACMAN SENİ YEDİ! 😱</div>
+        <button id="retry-btn" class="start-btn-class">TEKRAR DENE 🎀</button>
+    </div>
+</div>
+
+<script>
+    const assets = {
+        player: { img: new Image(), src: 'https://resmim.net/cdn/2026/02/01/w6HxSj.png' },
+        star: { img: new Image(), src: 'https://resmim.net/cdn/2026/01/31/wVgHRQ.jpg' },
+        obstacle: { img: new Image(), src: 'https://img.icons8.com/papercut/120/kawaii-cupcake.png' }
+    };
+
+    Object.keys(assets).forEach(key => assets[key].img.src = assets[key].src);
+
+    function isImageValid(img) {
+        return img.complete && img.naturalWidth !== 0;
+    }
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const speedEl = document.getElementById('speed-val');
+    const scoreEl = document.getElementById('score-val');
+    const diffLabel = document.getElementById('diff-label');
+    const speedBox = document.getElementById('speed-box');
+    const overlay = document.getElementById('overlay');
+    const startScreen = document.getElementById('start-screen');
+    const realStartBtn = document.getElementById('real-start-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const boostBar = document.getElementById('boost-bar');
+    const boostFill = document.getElementById('boost-fill');
+    const diffBtns = document.querySelectorAll('.diff-btn');
+
+    let gameActive = false;
+    let isGameOverSequence = false;
+    let score = 0;
+    let currentDifficulty = 'medium';
+
+    const difficultySettings = {
+        easy: { baseSpeed: 45, boostSpeed: 80, spawnRate: 0.012, obstacleMinSpeed: 0.8, label: 'KOLAY' },
+        medium: { baseSpeed: 65, boostSpeed: 110, spawnRate: 0.022, obstacleMinSpeed: 1.2, label: 'ORTA' },
+        hard: { baseSpeed: 85, boostSpeed: 140, spawnRate: 0.035, obstacleMinSpeed: 1.8, label: 'ZOR' }
+    };
+
+    let speed = 0;
+    const laneWidth = 90;
+    const roadWidth = 360;
+    
+    let isBoosted = false;
+    let boostTimer = 0;
+    const boostDuration = 3000;
+
+    const player = { x: 0, y: 0, lane: 1, targetX: 0, opacity: 1 };
+    let roadOffset = 0;
+    const trees = [];
+    const traffic = [];
+    const items = [];
+
+    // Pacman Ayarları
+    const pacman = {
+        active: false,
+        x: -200,
+        y: 0,
+        size: 150,
+        speed: 12,
+        mouthOpen: 0,
+        mouthDir: 1,
+        hue: 0
+    };
+    
+    function init() {
+        resize();
+        const config = difficultySettings[currentDifficulty];
+        diffLabel.innerText = config.label;
         
-        // Oyuncu Aracı Resmi (Kuş bakışı motor veya araba)
-        const OYUNCU_RESMI = "https://resmim.net/cdn/2026/02/01/w6HxSj.png"; 
+        player.lane = 1;
+        player.x = getLaneX(1);
+        player.targetX = player.x;
+        player.y = canvas.height - 150;
+        player.opacity = 1;
         
-        // Boost (Nitro) Şişesi Resmi
-        const BOOST_RESMI = "https://resmim.net/cdn/2026/01/31/wVgHRQ.jpg";
+        score = 0;
+        speed = config.baseSpeed;
+        isBoosted = false;
+        boostTimer = 0;
+        traffic.length = 0;
+        trees.length = 0;
+        items.length = 0;
+        
+        pacman.active = false;
+        pacman.x = -200;
+        isGameOverSequence = false;
 
-        // ==========================================
+        boostBar.style.display = 'none';
+        speedBox.classList.remove('boost-active');
+        
+        for(let i = 0; i < 12; i++) createTree(i * (canvas.height / 6));
+    }
 
-        const player = document.getElementById('player');
-        const boostFire = document.getElementById('boost-fire');
-        const road = document.getElementById('road');
-        const sideLeft = document.getElementById('side-left');
-        const sideRight = document.getElementById('side-right');
-        const scoreBoard = document.getElementById('score-board');
-        const boostIndicator = document.getElementById('boost-indicator');
-        const gameOverScreen = document.getElementById('game-over-screen');
-        const finalScore = document.getElementById('final-score');
-        const pacman = document.getElementById('pacman');
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        player.y = canvas.height - 150;
+    }
 
-        // Resimleri uygula
-        player.style.backgroundImage = `url('${OYUNCU_RESMI}')`;
+    window.addEventListener('resize', resize);
 
-        let gameRunning = true;
-        let score = 0;
-        let baseSpeed = 5; // Normal hız
-        let currentSpeed = 5;
-        let lane = 1; 
-        let obstacles = [];
-        let boostItems = [];
-        let trees = [];
-        let animationFrameId;
-        let isBoosting = false;
-        let boostTimeout;
+    function getLaneX(lane) {
+        const startX = (canvas.width - roadWidth) / 2;
+        return startX + (lane * laneWidth) + (laneWidth / 2);
+    }
 
-        const lanePositions = [56, 170, 283];
+    function createTree(y = -100) {
+        const side = Math.random() > 0.5 ? 1 : -1;
+        const x = (canvas.width / 2) + (side * (roadWidth / 2 + 70 + Math.random() * 80));
+        trees.push({ 
+            x, y, 
+            size: 35 + Math.random() * 25,
+            color: Math.random() > 0.5 ? '#f8bbd0' : '#f48fb1' 
+        });
+    }
 
-        document.addEventListener('keydown', (e) => {
-            if (!gameRunning) return;
-            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-                if (lane > 0) lane--;
-            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-                if (lane < 2) lane++;
+    function spawnTraffic() {
+        if (isGameOverSequence) return;
+        const config = difficultySettings[currentDifficulty];
+        if (Math.random() < config.spawnRate) {
+            const lane = Math.floor(Math.random() * 4);
+            const exists = traffic.some(t => t.lane === lane && t.y < 250);
+            if (!exists) {
+                traffic.push({
+                    lane: lane,
+                    x: getLaneX(lane),
+                    y: -150,
+                    speed: config.obstacleMinSpeed + Math.random() * 1.5
+                });
             }
-            updatePlayerPosition();
+        }
+    }
+
+    function spawnItem() {
+        if (isGameOverSequence) return;
+        if (Math.random() < 0.006) {
+            const lane = Math.floor(Math.random() * 4);
+            items.push({ x: getLaneX(lane), y: -100 });
+        }
+    }
+
+    function drawPacman() {
+        if (!pacman.active) return;
+        
+        pacman.hue = (pacman.hue + 5) % 360;
+        ctx.save();
+        ctx.translate(pacman.x, pacman.y);
+        
+        // RGB Rengi
+        ctx.fillStyle = `hsla(${pacman.hue}, 80%, 60%, 1)`;
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 3;
+
+        // Ağız animasyonu
+        pacman.mouthOpen += 0.15 * pacman.mouthDir;
+        if (pacman.mouthOpen > 0.25 || pacman.mouthOpen < 0) pacman.mouthDir *= -1;
+
+        // Pacman Gövdesi
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, pacman.size, Math.PI * pacman.mouthOpen, Math.PI * (2 - pacman.mouthOpen));
+        ctx.lineTo(0, 0);
+        ctx.fill();
+        ctx.stroke();
+
+        // Göz
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.arc(pacman.size / 3, -pacman.size / 2, pacman.size / 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    function drawPlayer(x, y) {
+        ctx.save();
+        ctx.globalAlpha = player.opacity;
+        ctx.translate(x, y);
+        if (isBoosted) {
+            ctx.shadowBlur = 40;
+            ctx.shadowColor = '#ffd700';
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(0, 0, 50, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        if (isImageValid(assets.player.img)) {
+            ctx.drawImage(assets.player.img, -45, -45, 90, 90);
+        } else {
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath(); ctx.arc(0, 0, 25, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    function drawObstacle(x, y) {
+        if (isImageValid(assets.obstacle.img)) {
+            ctx.drawImage(assets.obstacle.img, x - 40, y - 40, 80, 80);
+        } else {
+            ctx.fillStyle = "#ff80ab";
+            ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI * 2); ctx.fill();
+        }
+    }
+
+    function drawStarItem(x, y) {
+        if (isImageValid(assets.star.img)) {
+            ctx.save();
+            ctx.shadowBlur = 15; ctx.shadowColor = "#ffd700";
+            ctx.drawImage(assets.star.img, x - 25, y - 25, 50, 50);
+            ctx.restore();
+        } else {
+            ctx.fillStyle = "#ffd700";
+            ctx.beginPath(); ctx.arc(x, y, 15, 0, Math.PI * 2); ctx.fill();
+        }
+    }
+
+    function drawSweetTree(tree) {
+        ctx.save();
+        ctx.translate(tree.x, tree.y);
+        ctx.fillStyle = '#b39ddb';
+        ctx.fillRect(-4, 0, 8, 30);
+        ctx.fillStyle = tree.color;
+        const r = tree.size;
+        ctx.beginPath();
+        ctx.arc(0, -r/2, r/1.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function triggerPacman() {
+        if (isGameOverSequence) return;
+        isGameOverSequence = true;
+        pacman.active = true;
+        pacman.y = player.y;
+        pacman.x = -200;
+        speed = 0; // Yolu durdur
+    }
+
+    function activateBoost() {
+        const config = difficultySettings[currentDifficulty];
+        isBoosted = true;
+        boostTimer = Date.now() + boostDuration;
+        speed = config.boostSpeed;
+        boostBar.style.display = 'block';
+        speedBox.classList.add('boost-active');
+    }
+
+    function update() {
+        if (!gameActive) return;
+
+        if (isGameOverSequence) {
+            pacman.x += pacman.speed;
+            // Pacman oyuncuya ulaştığında oyuncu kaybolur
+            if (pacman.x > player.x - 50) {
+                player.opacity = Math.max(0, player.opacity - 0.2);
+            }
+            // Pacman ekranın sağına geçtiğinde final ekranı
+            if (pacman.x > canvas.width + 200) {
+                showFinalScreen();
+            }
+            return;
+        }
+
+        const config = difficultySettings[currentDifficulty];
+        if(isBoosted) {
+            const remaining = boostTimer - Date.now();
+            if(remaining <= 0) {
+                isBoosted = false;
+                speed = config.baseSpeed;
+                boostBar.style.display = 'none';
+                speedBox.classList.remove('boost-active');
+            } else {
+                boostFill.style.width = (remaining / boostDuration * 100) + '%';
+            }
+        }
+
+        score += isBoosted ? 3 : 1; 
+        speedEl.innerText = Math.floor(speed);
+        scoreEl.innerText = score;
+
+        roadOffset += speed * 0.12;
+        if (roadOffset > 100) roadOffset = 0;
+
+        player.x += (player.targetX - player.x) * 0.15;
+
+        trees.forEach(t => {
+            t.y += speed * 0.12;
+            if (t.y > canvas.height + 100) {
+                t.y = -100;
+                const side = Math.random() > 0.5 ? 1 : -1;
+                t.x = (canvas.width / 2) + (side * (roadWidth / 2 + 70 + Math.random() * 80));
+            }
         });
 
-        function updatePlayerPosition() {
-            player.style.left = lanePositions[lane] + 'px';
-            const tilt = lane === 1 ? 0 : (lane === 0 ? -15 : 15);
-            player.style.transform = `translateX(-50%) rotate(${tilt}deg)`;
-        }
-
-        function activateBoost() {
-            if (isBoosting) return; // Zaten aktifse tekrar etme
-            
-            isBoosting = true;
-            boostIndicator.style.display = 'block';
-            boostFire.style.display = 'block';
-            road.classList.add('road-boosted');
-            
-            // Hızı artır
-            currentSpeed = baseSpeed + 10; 
-
-            // 6 Saniye sonra kapat
-            clearTimeout(boostTimeout);
-            boostTimeout = setTimeout(() => {
-                isBoosting = false;
-                currentSpeed = baseSpeed;
-                boostIndicator.style.display = 'none';
-                boostFire.style.display = 'none';
-                road.classList.remove('road-boosted');
-            }, 6000);
-        }
-
-        function createObstacle() {
-            if (!gameRunning) return;
-            const obs = document.createElement('div');
-            obs.classList.add('obstacle');
-            
-            const types = ['obs-car', 'obs-truck', 'obs-motor'];
-            const randomType = types[Math.floor(Math.random() * types.length)];
-            obs.classList.add(randomType);
-
-            const randomLane = Math.floor(Math.random() * 3);
-            obs.style.left = lanePositions[randomLane] + 'px';
-            obs.style.top = '-150px';
-            
-            road.appendChild(obs);
-            obstacles.push({ element: obs, top: -150 });
-        }
-
-        function createBoostItem() {
-            if (!gameRunning) return;
-            const item = document.createElement('div');
-            item.classList.add('boost-item');
-            item.style.backgroundImage = `url('${BOOST_RESMI}')`;
-            
-            const randomLane = Math.floor(Math.random() * 3);
-            item.style.left = lanePositions[randomLane] + 'px';
-            item.style.top = '-100px';
-
-            road.appendChild(item);
-            boostItems.push({ element: item, top: -100 });
-        }
-
-        function createTree() {
-            if (!gameRunning) return;
-            const tree = document.createElement('div');
-            tree.classList.add('tree');
-            tree.style.top = '-70px';
-            const side = Math.random() < 0.5 ? sideLeft : sideRight;
-            tree.style.left = Math.random() * 70 + 'px';
-            side.appendChild(tree);
-            trees.push({ element: tree, top: -70 });
-        }
-
-        function gameLoop() {
-            if (!gameRunning) return;
-
-            // Skor artışı (Boost varsa 5 kat hızlı artar)
-            score += isBoosting ? 5 : 1;
-            scoreBoard.innerText = "SKOR: " + Math.floor(score / 10);
-
-            // Zamanla hızlanma (Boost yoksa)
-            if (!isBoosting && score % 500 === 0) {
-                baseSpeed += 0.5;
-                currentSpeed = baseSpeed;
+        spawnTraffic();
+        for (let i = traffic.length - 1; i >= 0; i--) {
+            const t = traffic[i];
+            t.y += (speed * 0.12) - t.speed;
+            if (Math.abs(player.x - t.x) < 50 && Math.abs(player.y - t.y) < 70) {
+                if(!isBoosted) triggerPacman();
             }
-
-            // Engel Oluşturma
-            if (Math.random() < 0.015) createObstacle();
-            
-            // Boost İtemi Oluşturma (Daha nadir)
-            if (Math.random() < 0.002) createBoostItem();
-
-            // Ağaç Oluşturma
-            if (Math.random() < 0.05) createTree();
-
-            // Engelleri Hareket Ettir
-            obstacles.forEach((obs, index) => {
-                obs.top += currentSpeed;
-                obs.element.style.top = obs.top + 'px';
-
-                if (checkCollision(player, obs.element)) {
-                    triggerGameOver();
-                }
-
-                if (obs.top > window.innerHeight) {
-                    obs.element.remove();
-                    obstacles.splice(index, 1);
-                }
-            });
-
-            // Boost İtemlerini Hareket Ettir
-            boostItems.forEach((item, index) => {
-                item.top += currentSpeed;
-                item.element.style.top = item.top + 'px';
-
-                // Boost alma kontrolü
-                if (checkCollision(player, item.element)) {
-                    activateBoost();
-                    item.element.remove();
-                    boostItems.splice(index, 1);
-                } else if (item.top > window.innerHeight) {
-                    item.element.remove();
-                    boostItems.splice(index, 1);
-                }
-            });
-
-            // Ağaçları Hareket Ettir
-            trees.forEach((tree, index) => {
-                tree.top += currentSpeed;
-                tree.element.style.top = tree.top + 'px';
-                if (tree.top > window.innerHeight) {
-                    tree.element.remove();
-                    trees.splice(index, 1);
-                }
-            });
-
-            animationFrameId = requestAnimationFrame(gameLoop);
+            if (t.y > canvas.height + 200 || t.y < -600) traffic.splice(i, 1);
         }
 
-        function checkCollision(playerEl, otherEl) {
-            const pRect = playerEl.getBoundingClientRect();
-            const oRect = otherEl.getBoundingClientRect();
-            
-            // Hitbox küçültme (daha adil oyun için)
-            const padding = 10;
-
-            return !(
-                pRect.top > oRect.bottom - padding ||
-                pRect.bottom < oRect.top + padding ||
-                pRect.right < oRect.left + padding ||
-                pRect.left > oRect.right - padding
-            );
-        }
-
-        function triggerGameOver() {
-            gameRunning = false;
-            cancelAnimationFrame(animationFrameId);
-            clearTimeout(boostTimeout);
-            
-            document.querySelectorAll('.lane-marker').forEach(el => el.style.animationPlayState = 'paused');
-            playPacmanAnimation();
-        }
-
-        function playPacmanAnimation() {
-            pacman.style.display = 'block';
-            const playerRect = player.getBoundingClientRect();
-            const containerRect = document.getElementById('game-container').getBoundingClientRect();
-            
-            const relativeTop = playerRect.top - containerRect.top - 20; 
-            pacman.style.top = relativeTop + 'px';
-            pacman.style.left = '-150px'; 
-
-            let pacmanPos = -150;
-            const targetPos = 130 + parseFloat(player.style.left); 
-
-            function animatePacman() {
-                pacmanPos += 20; 
-                pacman.style.left = pacmanPos + 'px';
-
-                if (pacmanPos < targetPos + 60) { 
-                    requestAnimationFrame(animatePacman);
-                } else {
-                    player.style.visibility = 'hidden';
-                    setTimeout(showGameOverScreen, 300);
-                }
+        spawnItem();
+        for (let i = items.length - 1; i >= 0; i--) {
+            const item = items[i];
+            item.y += speed * 0.12;
+            if (Math.abs(player.x - item.x) < 50 && Math.abs(player.y - item.y) < 50) {
+                activateBoost();
+                items.splice(i, 1);
+            } else if (item.y > canvas.height + 100) {
+                items.splice(i, 1);
             }
-            animatePacman();
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const startX = (canvas.width - roadWidth) / 2;
+        
+        // Yol Çizimi
+        ctx.fillStyle = '#ede7f6';
+        ctx.fillRect(startX - 20, 0, roadWidth + 40, canvas.height);
+        ctx.fillStyle = '#d1c4e9';
+        ctx.fillRect(startX - 20, 0, 10, canvas.height);
+        ctx.fillRect(startX + roadWidth + 10, 0, 10, canvas.height);
+
+        // Şeritler
+        ctx.fillStyle = '#ff80ab';
+        for (let i = -100; i < canvas.height + 100; i += 100) {
+            const yPos = i + (roadOffset % 100);
+            for(let j = 1; j < 4; j++) {
+                ctx.beginPath(); ctx.arc(startX + j * laneWidth, yPos, 4, 0, Math.PI * 2); ctx.fill();
+            }
         }
 
-        function showGameOverScreen() {
-            finalScore.innerText = "Skor: " + Math.floor(score / 10);
-            gameOverScreen.style.display = 'flex';
+        trees.forEach(drawSweetTree);
+        items.forEach(item => drawStarItem(item.x, item.y));
+        traffic.forEach(t => drawObstacle(t.x, t.y));
+        
+        drawPlayer(player.x, player.y);
+        drawPacman();
+    }
+
+    function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function showFinalScreen() {
+        gameActive = false;
+        overlay.style.display = 'flex';
+    }
+
+    // Kontroller
+    window.addEventListener('keydown', (e) => {
+        if (!gameActive || isGameOverSequence) return;
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+            if (player.lane > 0) { player.lane--; player.targetX = getLaneX(player.lane); }
         }
-
-        function resetGame() {
-            gameRunning = true;
-            score = 0;
-            baseSpeed = 5;
-            currentSpeed = 5;
-            lane = 1;
-            isBoosting = false;
-            
-            updatePlayerPosition();
-            player.style.visibility = 'visible';
-            boostIndicator.style.display = 'none';
-            boostFire.style.display = 'none';
-            road.classList.remove('road-boosted');
-            
-            // Temizlik
-            obstacles.forEach(o => o.element.remove());
-            obstacles = [];
-            boostItems.forEach(b => b.element.remove());
-            boostItems = [];
-            trees.forEach(t => t.element.remove());
-            trees = [];
-            
-            pacman.style.display = 'none';
-            gameOverScreen.style.display = 'none';
-            document.querySelectorAll('.lane-marker').forEach(el => el.style.animationPlayState = 'running');
-
-            gameLoop();
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+            if (player.lane < 3) { player.lane++; player.targetX = getLaneX(player.lane); }
         }
+    });
 
-        updatePlayerPosition();
-        gameLoop();
+    canvas.addEventListener('touchstart', (e) => {
+        if (!gameActive || isGameOverSequence) return;
+        const touchX = e.touches[0].clientX;
+        if (touchX < canvas.width / 2) { if (player.lane > 0) player.lane--; }
+        else { if (player.lane < 3) player.lane++; }
+        player.targetX = getLaneX(player.lane);
+    });
 
-    </script>
+    // Menü İşlemleri
+    diffBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            diffBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentDifficulty = btn.dataset.level;
+        });
+    });
+
+    realStartBtn.addEventListener('click', () => {
+        startScreen.style.display = 'none';
+        init();
+        gameActive = true;
+    });
+
+    retryBtn.addEventListener('click', () => {
+        overlay.style.display = 'none';
+        init();
+        gameActive = true;
+    });
+
+    init();
+    gameLoop();
+</script>
 </body>
 </html>
