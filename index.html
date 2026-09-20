@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirPods Max & Pro - Minimalist Satış Deneyimi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        appleGray: '#f5f5f7',
+                        appleDark: '#1d1d1f',
+                        appleBlue: '#0071e3',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Modern Apple-style glassmorphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .dark-glass {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+        }
+        /* Product glow effect */
+        .img-glow {
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.08));
+            transition: all 0.5s ease;
+        }
+        .img-glow:hover {
+            filter: drop-shadow(0 30px 40px rgba(0,0,0,0.15));
+            transform: translateY(-4px);
+        }
+    </style>
+</head>
+<body class="bg-appleGray text-appleDark font-sans antialiased selection:bg-appleBlue selection:text-white">
+
+    <nav class="fixed top-0 left-0 right-0 z-40 glass border-b border-gray-200/50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2 font-semibold text-xl tracking-tight">
+                <i class="fa-brands fa-apple text-2xl mb-1"></i>
+                <span>AirPods Store</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-600">
+                <a href="#overview" class="hover:text-black transition">Genel Bakış</a>
+                <a href="#features" class="hover:text-black transition">Özellikler</a>
+                <a href="#guide" class="hover:text-black transition">GitHub Kurulum Rehberi</a>
+            </div>
+            <button onclick="scrollToBuy()" class="bg-appleBlue hover:bg-blue-600 text-white text-xs md:text-sm font-medium px-5 py-2 rounded-full transition-all shadow-sm">
+                Satın Al
+            </button>
+        </div>
+    </nav>
+
+    <main class="pt-28 pb-16 px-6 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            <!-- Product Image Container -->
+            <div class="relative bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 flex flex-col items-center justify-center min-h-[420px] md:min-h-[500px]">
+                <span class="absolute top-6 left-6 text-xs uppercase tracking-widest text-gray-400 font-semibold">Yeni Nesil</span>
+                
+                <!-- White AirPods Image (SVG Vector Mock for high definition) -->
+                <div class="relative w-full max-w-sm flex items-center justify-center my-8">
+                    <svg class="w-full h-auto img-glow max-h-[320px]" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Left Earbud -->
+                        <g filter="url(#shadow)">
+                            <path d="M150 120C150 90 170 70 200 70C225 70 240 85 240 110C240 135 220 150 200 150C190 150 180 145 175 140L160 270C158 280 150 285 140 285C130 285 122 278 124 268L140 140C132 130 150 120 150 120Z" fill="#FFFFFF"/>
+                            <path d="M150 120C150 90 170 70 200 70C225 70 240 85 240 110C240 135 220 150 200 150" stroke="#E5E7EB" stroke-width="2"/>
+                            <!-- Speaker Mesh -->
+                            <ellipse cx="210" cy="110" rx="12" ry="18" fill="#1D1D1F"/>
+                            <ellipse cx="170" cy="115" rx="4" ry="8" fill="#D1D5DB"/>
+                            <rect x="135" y="275" width="12" height="4" rx="2" fill="#D1D5DB"/>
+                        </g>
+                        <!-- Right Earbud -->
+                        <g filter="url(#shadow)">
+                            <path d="M250 120C250 90 230 70 200 70C175 70 160 85 160 110C160 135 180 150 200 150C210 150 220 145 225 140L240 270C242 280 250 285 260 285C270 285 278 278 276 268L260 140C268 130 250 120 250 120Z" fill="#FAFAFA"/>
+                            <path d="M250 120C250 90 230 70 200 70C175 70 160 85 160 110C160 135 180 150 200 150" stroke="#E5E7EB" stroke-width="2"/>
+                            <!-- Speaker Mesh -->
+                            <ellipse cx="190" cy="110" rx="12" ry="18" fill="#1D1D1F"/>
+                            <ellipse cx="230" cy="115" rx="4" ry="8" fill="#D1D5DB"/>
+                            <rect x="253" y="275" width="12" height="4" rx="2" fill="#D1D5DB"/>
+                        </g>
+                        <!-- Case Outline Light Gradient -->
+                        <path d="M120 200C120 180 135 165 155 165H245C265 165 280 180 280 200V280C280 310 255 335 225 335H175C145 335 120 310 120 280V200Z" fill="url(#caseGrad)" opacity="0.95"/>
+                        <rect x="185" y="235" width="30" height="4" rx="2" fill="#E5E7EB"/>
+                        <circle cx="200" cy="275" r="3" fill="#34D399"/>
+                        <defs>
+                            <linearGradient id="caseGrad" x1="120" y1="165" x2="280" y2="335" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#FFFFFF"/>
+                                <stop offset="1" stop-color="#F3F4F6"/>
+                            </linearGradient>
+                            <filter id="shadow" x="100" y="50" width="200" height="260" filterUnits="userSpaceOnUse">
+                                <feDropShadow dx="0" dy="10" stdDeviation="10" flood-opacity="0.08"/>
+                            </filter>
+                        </defs>
+                    </svg>
+                </div>
+
+                <!-- Interactive Trigger Buttons -->
+                <div class="flex items-center space-x-4">
+                    <button id="openVideoBtn" class="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-appleDark font-semibold text-sm px-6 py-3 rounded-full transition-all">
+                        <i class="fa-solid fa-play text-appleBlue"></i>
+                        <span>Detayları İzle</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product Info Section -->
+            <div id="overview" class="flex flex-col space-y-6">
+                <div>
+                    <span class="text-xs font-bold text-appleBlue uppercase tracking-wider">İkonik Tasarım. Sihirli Ses.</span>
+                    <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-appleDark mt-2">AirPods Pro</h1>
+                    <p class="text-2xl font-medium text-gray-500 mt-2">Büyüleyici Ses Kalitesi.</p>
+                </div>
+
+                <p class="text-gray-600 leading-relaxed text-base">
+                    Aktif Gürültü Engelleme ve Şeffaf Mod ile müziğinize hiç olmadığı kadar yakın olun. Kişiselleştirilmiş Mekansal Ses teknolojisi etrafınızı sararak sinematik bir ses deneyimi sunar.
+                </p>
+
+                <!-- Key Features Grid -->
+                <div id="features" class="grid grid-cols-2 gap-4 py-2">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-start space-x-3">
+                        <div class="p-2 bg-blue-50 text-appleBlue rounded-xl">
+                            <i class="fa-solid fa-headphones text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-appleDark">Mekansal Ses</h4>
+                            <p class="text-xs text-gray-500">Dinamik kafa izleme</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-start space-x-3">
+                        <div class="p-2 bg-blue-50 text-appleBlue rounded-xl">
+                            <i class="fa-solid fa-wave-square text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-appleDark">Aktif Gürültü</h4>
+                            <p class="text-xs text-gray-500">2 kat daha etkili</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-start space-x-3">
+                        <div class="p-2 bg-blue-50 text-appleBlue rounded-xl">
+                            <i class="fa-solid fa-battery-full text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-appleDark">30 Saat Pil</h4>
+                            <p class="text-xs text-gray-500">Kutu ile toplam süre</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-start space-x-3">
+                        <div class="p-2 bg-blue-50 text-appleBlue rounded-xl">
+                            <i class="fa-solid fa-bolt text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-appleDark">MagSafe</h4>
+                            <p class="text-xs text-gray-500">Kablosuz Hızlı Şarj</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price and Buy Action -->
+                <div id="buy-section" class="pt-4 border-t border-gray-200 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-gray-400 uppercase font-semibold">Fiyat</span>
+                        <div class="text-3xl font-bold text-appleDark">₺7.499</div>
+                    </div>
+                    <button onclick="handlePurchase()" class="bg-appleBlue hover:bg-blue-600 text-white font-medium px-8 py-3.5 rounded-full shadow-lg transition-all text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                        <span>Satın Al</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <section id="guide" class="mt-24 bg-white rounded-3xl p-8 md:p-12 border border-gray-100 shadow-sm">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 flex items-center space-x-3">
+                <i class="fa-brands fa-github text-appleDark"></i>
+                <span>GitHub Pages Kurulum ve Video Yapılandırma Rehberi</span>
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm leading-relaxed">
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-appleBlue border-b pb-2">1. GitHub Deposu Yapısı</h3>
+                    <p class="text-gray-600">
+                        Sitenizin ve video dosyanızın sorunsuz yüklenmesi için GitHub deposundaki klasör hiyerarşisi tam olarak şu şekilde olmalıdır:
+                    </p>
+                    <pre class="bg-gray-900 text-gray-100 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+my-airpods-site/
+├── index.html        (Bu dosya)
+└── assets/
+    └── video.mp4     (Detay videonuz)
+                    </pre>
+                    <p class="text-xs text-gray-500">
+                        * Not: HTML dosyasındaki video etiketi path olarak <code class="bg-gray-100 px-1 py-0.5 rounded text-appleBlue">./assets/video.mp4</code> yolunu kullanır.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-appleBlue border-b pb-2">2. Videonun Son Karede Donma Mantığı</h3>
+                    <p class="text-gray-600">
+                        Videonun bittiğinde başa dönmemesi veya siyah kalmaması için HTML5 JavaScript API'sinde <code class="bg-gray-100 px-1 rounded text-appleBlue">ended</code> olayı (event) dinlenir:
+                    </p>
+                    <pre class="bg-gray-900 text-gray-100 p-4 rounded-xl text-xs font-mono overflow-x-auto">
+video.addEventListener('ended', () => {
+    // Video bittiğinde duraklatır ve 
+    // son karede takılı kalmasını sağlar
+    video.pause();
+    console.log("Video son karede donduruldu.");
+});
+                    </pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="videoModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 dark-glass hidden opacity-0 transition-opacity duration-300">
+        <div class="relative w-full max-w-4xl bg-black rounded-3xl overflow-hidden shadow-2xl border border-gray-800">
+            
+            <!-- Modal Header / Controls -->
+            <div class="absolute top-4 right-4 z-10 flex items-center space-x-2">
+                <button id="closeVideoBtn" class="bg-white/20 hover:bg-white/40 text-white p-3 rounded-full backdrop-blur-md transition-all flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Video Player -->
+            <div class="relative aspect-video bg-black">
+                <!-- Video Source pointing to local repository assets folder -->
+                <video id="detailVideo" class="w-full h-full object-cover" playsinline>
+                    <source src="./assets/video.mp4" type="video/mp4">
+                    Tarayıcınız video etiketini desteklemiyor.
+                </video>
+                
+                <!-- Fallback Info Overlay when local video is missing -->
+                <div id="videoErrorOverlay" class="hidden absolute inset-0 bg-gray-900/90 text-white flex flex-col items-center justify-center p-6 text-center space-y-4">
+                    <i class="fa-solid fa-circle-exclamation text-4xl text-amber-400"></i>
+                    <h3 class="text-xl font-bold">Video Dosyası Bulunamadı</h3>
+                    <p class="text-sm text-gray-300 max-w-md">
+                        GitHub projenize <code class="bg-gray-800 px-2 py-1 rounded text-amber-300">assets/video.mp4</code> yolunu eklediğinizde bu alanda kendi videonuz oynatılacaktır.
+                    </p>
+                </div>
+
+                <!-- End Overlay Indicator -->
+                <div id="freezeIndicator" class="hidden absolute bottom-6 left-6 bg-black/60 backdrop-blur-md text-white text-xs px-4 py-2 rounded-full flex items-center space-x-2">
+                    <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    <span>Video Tamamlandı (Son Kare)</span>
+                </div>
+            </div>
+
+            <!-- Modal Bottom Status -->
+            <div class="bg-gray-900 p-4 px-6 flex items-center justify-between text-xs text-gray-400">
+                <span>AirPods Pro - Ürün Detay Sunumu</span>
+                <button id="replayBtn" class="text-appleBlue hover:underline flex items-center space-x-1">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Tekrar Oynat</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const openVideoBtn = document.getElementById('openVideoBtn');
+        const closeVideoBtn = document.getElementById('closeVideoBtn');
+        const videoModal = document.getElementById('videoModal');
+        const detailVideo = document.getElementById('detailVideo');
+        const freezeIndicator = document.getElementById('freezeIndicator');
+        const replayBtn = document.getElementById('replayBtn');
+        const videoErrorOverlay = document.getElementById('videoErrorOverlay');
+
+        // Open Modal & Play Video
+        openVideoBtn.addEventListener('click', () => {
+            videoModal.classList.remove('hidden');
+            // Trigger animation fade-in
+            setTimeout(() => {
+                videoModal.classList.remove('opacity-0');
+            }, 10);
+
+            freezeIndicator.classList.add('hidden');
+            
+            // Try playing video from local repo path
+            const playPromise = detailVideo.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Video yüklenemedi veya bulunamadı:", error);
+                    // Show error state if local assets/video.mp4 doesn't exist yet
+                    videoErrorOverlay.classList.remove('hidden');
+                });
+            }
+        });
+
+        // Close Modal & Reset Video State
+        function closeModal() {
+            videoModal.classList.add('opacity-0');
+            setTimeout(() => {
+                videoModal.classList.add('hidden');
+                detailVideo.pause();
+                detailVideo.currentTime = 0;
+                freezeIndicator.classList.add('hidden');
+                videoErrorOverlay.classList.add('hidden');
+            }, 300);
+        }
+
+        closeVideoBtn.addEventListener('click', closeModal);
+
+        // Close modal on outside backdrop click
+        videoModal.addEventListener('click', (e) => {
+            if (e.target === videoModal) {
+                closeModal();
+            }
+        });
+
+        // CRITICAL FEATURE: Video freezes on last frame when ended
+        detailVideo.addEventListener('ended', () => {
+            // Explicitly pause to keep freeze on final frame
+            detailVideo.pause();
+            // Display indicator showing video completed and frozen
+            freezeIndicator.classList.remove('hidden');
+        });
+
+        // Replay Button Logic
+        replayBtn.addEventListener('click', () => {
+            freezeIndicator.classList.add('hidden');
+            detailVideo.currentTime = 0;
+            detailVideo.play();
+        });
+
+        // Smooth Scroll Helper
+        function scrollToBuy() {
+            document.getElementById('buy-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Notification for Buy Action
+        function handlePurchase() {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-check"></i> <span>Sepete Eklendi</span>`;
+            btn.classList.remove('bg-appleBlue');
+            btn.classList.add('bg-green-600');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('bg-green-600');
+                btn.classList.add('bg-appleBlue');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
